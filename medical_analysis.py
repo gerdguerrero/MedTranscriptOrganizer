@@ -11,8 +11,28 @@ import numpy as np
 from collections import defaultdict
 from difflib import SequenceMatcher
 
+# Load environment variables
 load_dotenv()
-api_key = os.getenv("OPENAI_API_KEY")
+
+# Initialize OpenAI client only if API key is available
+api_key = os.getenv('OPENAI_API_KEY')
+client = None
+
+if api_key and api_key != 'your_openai_api_key_here':
+    try:
+        client = OpenAI(api_key=api_key)
+        print("✅ OpenAI client initialized successfully")
+    except Exception as e:
+        print(f"⚠️ Warning: Could not initialize OpenAI client: {e}")
+        print("💡 Using simulated extraction instead")
+        client = None
+else:
+    print("⚠️ Warning: OPENAI_API_KEY not found in environment variables")
+    print("💡 Using simulated extraction for demonstration")
+    print("🔧 To use real OpenAI API:")
+    print("   1. Copy .env.example to .env")
+    print("   2. Add your OpenAI API key to .env")
+    print("   3. Run the script again")
 
 # Load the data from the uploaded file
 df = pd.read_csv("datalab_export_2025-08-26 16_46_50.csv")
@@ -23,10 +43,6 @@ print(f"Shape: {df.shape}")
 print(f"Columns: {df.columns.tolist()}")
 print("\nFirst few rows:")
 print(df.head())
-
-client = None
-if api_key:
-    client = OpenAI(api_key=api_key)
 
 def extract_age_from_text(text: str) -> str:
     """Extract age from medical transcription text."""
